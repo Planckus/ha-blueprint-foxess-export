@@ -1,0 +1,103 @@
+blueprint:
+  name: "FoxESS - Export Limit by Electricity Price"
+  description: >
+    Automatically controls the FoxESS H3 Smart inverter export power limit
+    based on the current electricity spot price — checked every 30 seconds.
+
+
+    - Price **above** threshold → full export allowed (configurable max watts)
+
+    - Price **at or below** threshold → export blocked (0 W)
+
+
+    Uses native Zigbee2MQTT-style register writes via the `foxess_modbus`
+    integration. No scripts or helpers required — one automation does it all.
+
+
+    **Compatible inverters:** FoxESS H3 Smart series (registers 46616/46617)
+
+    **Required integration:** [foxess_modbus](https://github.com/nathanmarlor/foxess_modbus) via HACS
+  domain: automation
+  author: Planckus
+  input:
+    price_sensor:
+      name: Electricity Price Sensor
+      description: >
+        Sensor providing the current electricity spot price (e.g.
+        sensor.stromligning_spotprice_vat). Any numeric sensor in the same
+        unit works.
+      selector:
+        entity:
+          domain: sensor
+
+    price_threshold:
+      name: Price Threshold
+      description: >
+        Export is allowed when the price is strictly above this value.
+        Below or equal → export is blocked.
+      default: 0.1
+      selector:
+        number:
+          min: 0
+          max: 10
+          step: 0.05
+          unit_of_measurement: "kr/kWh"
+          mode: box
+
+    inverter_device:
+      name: FoxESS Inverter
+      description: >
+        Your FoxESS inverter device as registered by the foxess_modbus
+        integration.
+      selector:
+        device:
+          integration: foxess_modbus
+
+    max_export_watts:
+      name: Maximum Export Power
+      description: >
+        Power limit written to the inverter when the price is above the
+        threshold. Set this to your inverter's rated output (e.g. 10000 for
+        a 10 kW unit).
+      default: 10000
+      selector:
+        number:
+          min: 0
+          max: 20000
+          step: 100
+          unit_of_measurement: "W"
+          mode: slider
+
+mode: single
+
+variables:
+  max_export_watts: !input max_export_watts
+
+trigger:
+  - platform: time_pattern
+    seconds: "/30"
+
+  - platform: homeassistant
+    event: start
+
+action:
+  - choose:
+      - conditions:
+          - condition: numeric_state
+            entity_id: !input price_sensor
+            above: !input price_threshold
+        sequence:
+          - service: foxess_modbus.write_registers
+            data:
+              inverter: !input inverter_device
+              start_address: 46616
+              values: >-
+                {{ (max_export_watts | int // 65536) }},
+                {{ (max_export_watts | int % 65536) }}
+
+    default:
+      - service: foxess_modbus.write_registers
+        data:
+          inverter: !input inverter_device
+          start_address: 46616
+          values: "0, 0"
