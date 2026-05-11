@@ -42,8 +42,8 @@ The blueprint writes the native Modbus **Export Power Limit** register (46616/46
 
 - [Home Assistant](https://www.home-assistant.io/)
 - [foxess_modbus](https://github.com/nathanmarlor/foxess_modbus) integration installed via HACS (v1.15.0 or later)
+- [Strømligning](https://github.com/MTrab/stromligning) integration installed via HACS — provides the electricity spot price sensor
 - FoxESS H3 Smart inverter connected via Modbus TCP
-- A sensor providing the current electricity spot price (numeric, any unit)
 
 ---
 

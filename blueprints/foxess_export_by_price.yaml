@@ -16,7 +16,11 @@ blueprint:
 
     **Compatible inverters:** FoxESS H3 Smart series (registers 46616/46617)
 
-    **Required integration:** [foxess_modbus](https://github.com/nathanmarlor/foxess_modbus) via HACS
+    **Required integrations:**
+
+    - [foxess_modbus](https://github.com/nathanmarlor/foxess_modbus) via HACS
+
+    - [Strømligning](https://github.com/MTrab/stromligning) via HACS — provides the electricity spot price sensor
   domain: automation
   author: Planckus
   input:
