@@ -141,7 +141,3 @@ Reference: *FoxESS H3 Smart Modbus Protocol V1.05.04.00*
 ## License
 
 MIT — free to use, share, and modify.
-
----
-
-*Made with ❤️ and [Claude](https://claude.ai)*
